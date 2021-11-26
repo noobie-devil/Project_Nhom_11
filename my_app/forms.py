@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import fields 
 from wtforms.validators import Length, EqualTo, DataRequired, ValidationError
-
+import re
 class CreateTableForm(FlaskForm):
 
 	def validate_table_name(self, table_name_to_check):
