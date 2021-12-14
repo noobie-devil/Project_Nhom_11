@@ -80,7 +80,55 @@ Trang chủ
 
 <script>
 
-        
+    // var api = "https://sqs.us-east-1.amazonaws.com/280808430883/CreateDynamoTableQueue";
+    function submit_entry(){
+    //     let data = new URLSearchParams();
+    //     data.append('Action', 'SendMessage');
+    //     data.append('MessageBody', payload);
+
+    //     const options = {
+    //         method: 'POST',
+    //         body: data
+    //     }
+    //     fetch(url, options).then()
+        let payload = {
+            "tablename": document.getElementById("table_name").value,
+            "keyHash": document.getElementById("partition_key").value,
+            "keyHash_type": "HASH",
+            "PartitionKey": document.getElementById("partition_key").value,
+            "PartitionKey_type": document.getElementById("partition_key_type").value,
+            "keyRange": document.getElementById("sort_key").value,
+            "keyRange_type": "RANGE",
+            "SortKey": document.getElementById("sort_key").value,
+            "SortKey_type": document.getElementById("sort_key_type").value
+        };
+        // var name = document.getElementById('name');
+        // var key = document.getElementById('key');
+        // var entry = {
+        //     name: name.value,
+        //     key: key.value
+        // }    
+        // var data = {
+        //     "MessageBody": encodeURIComponent(JSON.stringify(payload))
+        // };
+        var data = encodeURIComponent(JSON.stringify(payload)); 
+        fetch("/create-tables",{
+            method: "post",
+            body: JSON.stringify({
+                "MessageBody": `${data}`
+            }),
+            headers: {
+                "content-type": "application/json"
+            }
+        }).then(function(response){
+            console.info(response);
+            return response.json()
+            
+        }).then(function(data){
+            console.info(data)
+        });
+    }
+    
 </script>
 
 {% endblock %}

@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}
+Trang chủ
+{% endblock %}
+{% block content %}
+
+<!-- Hover table card start -->
+<div class="row">
+    <div class="col-sm-12">
+        <!-- Typography card start -->
+        <div class="card">
+            <div class="card-header">
+               
+            </div>
+            <div class="card-block typography">
+                <div class="row">
+                    <div class="col-sm-12 col-xl-3" style="border-right: 0.5px solid #9BA1A5;">
+                        <h4 class="sub-title"><b style="font-size:1.3rem; font-weight: 700; text-transform: capitalize;">Table({{ list_tables|length }})</b>
+                        <i class="ti-reload" style="float:right; font-size: 1.1rem; font-weight:bold;"></i>
+                        </h4>
+                        {% for table in list_tables %}
+                        <h6 class="sub-title" style="text-transform: none; font-weight: normal;">
+                            <div class="form-check ml-4">
+                                <input class="form-check-input" type="radio" name="flexRadioDefault" id="radio-{{loop.index}}" value="{{ table['table_name'] }}" autocomplete="off">
+                                <label class="form-check-label" for="radio-{{loop.index}}">
+                                    {{ table['table_name'] }}
+                                </label>
+                            </div>
+                        </h6>
+                        {% endfor %}
+                    
+                    </div>
+                    <div id="main-body-table" class="col-sm-12 col-xl-9">
+                        <h6 class="text-center pt-5"><strong>On this page, query and scan for items.</strong></h6>
+                        <h6 class="text-center ">Choose a table to get started. Standard query and scanning prices applies.</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Typography card end -->
+    </div>
+</div>
+<!-- Hover table card end -->
+<!-- Main-body end -->
+<div id="styleSelector">
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+{% endblock %}
+{% block script%}
+<script>
+
+
+    radioButtons = document.querySelectorAll('input[type="radio"]');
+    radioButtons.forEach(el => el.addEventListener('click', (el) => {
+        getDataTable(el.currentTarget.value);
+    }));
+
+    function getDataTable(tableName){
+        fetch(`{{ url_for('ajax_get_table') }}?table-name=${tableName}`,{
+            method: "post",
+            body: JSON.stringify({
+                "table_name": tableName
+            }),
+            headers: {
+                "content-type": "application/json"
+            }
+        })
+        .then(response => {
+            if(response.ok){
+                console.log(response);
+                return response.json();
+            }
+
+        })
+        .then(json => {
+            document.getElementById('main-body-table').innerHTML = json.html;
+            var selectall = document.getElementById('selectall');
+            var enableDelete = document.getElementById('delete-btn');
+            var checkboxs = document.getElementsByClassName('action-checkbox');
+            console.log("hello");
+            alert('hello');
+        });
+    }
+</script>
+{% endblock %}
