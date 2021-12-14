@@ -116,6 +116,7 @@ def create_user(user_name, public_id, email_address, password):
 @token_required
 def home_page(current_user):
     list_tables = get_tables(current_user)
+    user_name = current_user['user_name']
     return render_template('index.html',tables=list_tables, current_user=current_user)
 
 @app.route("/tables/ajax-get", methods=['GET'])
@@ -143,6 +144,7 @@ def get_tables(current_user):
 @token_required
 def delete_tables(current_user):
     data = request.json
+    public_id = current_user['public_id']
     url = 'https://sqs.us-east-1.amazonaws.com/280808430883/DeleteDynamoTableQueue'
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     for table in data['tables']:
@@ -157,6 +159,14 @@ def delete_tables(current_user):
         }
         send = requests.post(url, headers=headers, params=params)
 
+        log_table = resource.Table('log_table')
+        response = log_table.delete_item(
+            Key={
+                'public_id': public_id,
+                'table_name': table
+            }
+        )
+        
     list_tables = get_tables(current_user)
     return Response(
         json.dumps({'tables': list_tables}),
@@ -189,7 +199,7 @@ def ajax_get_table(current_user):
 @token_required
 def items_page(current_user):
     list_tables = get_all_table_by_public_id(current_user['public_id'])
-    return render_template('items.html', list_tables=list_tables)
+    return render_template('items.html', list_tables=list_tables, current_user=current_user)
 
 @app.route("/edit-item")
 @token_required
@@ -456,4 +466,4 @@ def create_tables_page(current_user):
         else:
             flash(f'A table with the same name already exists. Table names in the same account and same AWS Regions must be unique.', category='danger')
         
-    return render_template('create-tables.html', form=form)    
+    return render_template('create-tables.html', form=form, current_user=current_user)    

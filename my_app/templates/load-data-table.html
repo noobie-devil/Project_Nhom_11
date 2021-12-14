@@ -6,9 +6,9 @@
             <button id="" class="btn btn-outline-dark btn-square mr-3 disabled"><i class="ti-reload"></i></button>
             <div class="dropdown-primary dropdown open">
                 <button class="btn dropdown-toggle btn btn-outline-dark btn-square waves-effect waves-light " type="button" id="dropdown-child" data-toggle="dropdown"  aria-haspopup="true" aria-expanded="true">Action</button>
-                <div class="dropdown-menu" aria-labelledby="dropdown-child" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut" style="max-height: 150px;overflow-y: auto;">
+                <div  class="dropdown-menu" aria-labelledby="dropdown-child" data-dropdown-in="fadeIn" data-dropdown-out="fadeOut" style="max-height: 150px;overflow-y: auto;">
                     <!-- <a class="dropdown-item waves-light waves-effect" href="#">Edit</a> -->
-                    <a class="dropdown-item waves-light waves-effect disabled text-capitalize" style="pointer-events: none;" href="#">Delete items</a>
+                    <a id="delete-btn" onclick="deleteHandler(this)" class="dropdown-item waves-light waves-effect disabled text-capitalize"  href="#">Delete items</a>
                 
                 </div>
             </div>
@@ -43,7 +43,7 @@
                     {% for row in table %}
                     <tr id="row-{{loop.index}}" data-index="{{loop.index}}">                        
                         <th scope="row">
-                            <input type="checkbox" name="" autocomplete="off" class="action-checkbox" value="" title="Chọn hồ sơ">
+                            <input type="checkbox" value="{{loop.index}}" onchange="addEventListener_Checkbox(this)" name="" autocomplete="off" class="action-checkbox" value="" title="Chọn hồ sơ">
                         </th>
                         {% for col in columns %}
                         <td>{{ row[col] }}</td>

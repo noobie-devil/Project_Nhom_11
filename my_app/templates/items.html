@@ -55,11 +55,31 @@ Trang chủ
 {% block script%}
 <script>
 
+    var enableDelete = undefined;
+    var checkboxs = undefined;
+    var selectall = undefined;
 
     radioButtons = document.querySelectorAll('input[type="radio"]');
     radioButtons.forEach(el => el.addEventListener('click', (el) => {
         getDataTable(el.currentTarget.value);
     }));
+
+    function deleteHandler(element){
+        if(!element.classList.contains('disabled'))
+        {
+            let tableDeleted = [];
+            checkboxs = document.getElementsByClassName('action-checkbox');
+            for(let i = 0; i < checkboxs.length; i++){
+                if(checkboxs[i].checked)
+                {
+                    tableDeleted.push(checkboxs[i].getAttribute('value'));
+                }
+            }
+            
+            console.log(table);
+        }
+    }
+
 
     function getDataTable(tableName){
         fetch(`{{ url_for('ajax_get_table') }}?table-name=${tableName}`,{
@@ -80,12 +100,84 @@ Trang chủ
         })
         .then(json => {
             document.getElementById('main-body-table').innerHTML = json.html;
-            var selectall = document.getElementById('selectall');
-            var enableDelete = document.getElementById('delete-btn');
-            var checkboxs = document.getElementsByClassName('action-checkbox');
-            console.log("hello");
-            alert('hello');
+            selectall = document.getElementById('selectall');
+            enableDelete = document.getElementById('delete-btn');
+            enableDelete.style['pointer-events'] = 'none';
+            checkboxs = document.getElementsByClassName('action-checkbox');
+            console.log(enableDelete);
         });
+    }
+
+    function checkDisabled(){
+        if (enableDelete != undefined){
+            console.log(enableDelete.getAttribute('style'));
+            if(enableDelete.classList.contains('disabled')){
+                return true;
+            }
+            return false;
+
+        }
+        
+    }
+
+    function disabled(){
+        if(enableDelete != undefined)
+        {
+            enableDelete.classList.add('disabled');
+            enableDelete.style['pointer-events'] = 'none';
+        }
+    }
+
+    function enabled(){
+        if(enableDelete != undefined)
+        {
+            enableDelete.classList.remove('disabled');
+            enableDelete.style['pointer-events'] = 'initial';
+        }
+    }
+
+    function eventCheckBox(element) {
+        if(enableDelete != undefined && checkboxs != undefined)
+        {
+            if(element.checked){
+                if(checkDisabled())
+                    enableDelete.classList.remove('disabled'); 
+                    enableDelete.style['pointer-events'] = 'initial';
+
+
+            }
+            else{
+                enableDelete.classList.add('disabled');  
+                enableDelete.style['pointer-events'] = 'none';                  
+            }
+            for(let i = 0; i < checkboxs.length ; i++) { //zero-based array
+                checkboxs[i].checked = element.checked;
+
+            }
+        }
+        
+    }
+
+    
+    function addEventListener_Checkbox(element)
+    {
+        if(element.checked){
+            element.checked = !selectall.checked;
+        }
+        checkboxs = document.getElementsByClassName('action-checkbox');
+        let count = 0;
+        for(let i = 0; i < checkboxs.length; i++){
+            if(checkboxs[i].checked)
+                count++;
+        }
+        if(count == 0){
+            disabled();
+        }
+        else{
+            enabled();
+        }
+
+
     }
 </script>
 {% endblock %}
