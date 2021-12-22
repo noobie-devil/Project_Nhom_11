@@ -30,15 +30,27 @@ def create_user(user_name, public_id, email_address, password):
     )
     return response
 
+# def get_tables(current_user):
+#     public_id = current_user['public_id']
+#     get_tables = get_all_table_by_public_id(public_id)
+#     list_tables = []
+#     for table in get_tables:
+#         item = client.describe_table(TableName=str(table['table_name'] + '-' + public_id))
+#         item['Table']['TableName'] = item['Table']['TableName'].split('-' + public_id)[0]
+#         list_tables.append(item)
+
+#     return list_tables
+
 def get_tables(current_user):
     public_id = current_user['public_id']
-    get_tables = get_all_table_by_public_id(public_id)
+    existing_tables = client.list_tables()['TableNames']
     list_tables = []
-    for table in get_tables:
-        item = client.describe_table(TableName=str(table['table_name'] + '-' + public_id))
-        item['Table']['TableName'] = item['Table']['TableName'].split('-' + public_id)[0]
-        list_tables.append(item)
-
+    for table_name in existing_tables:
+        sep = table_name.split('-' + public_id)
+        if len(sep) > 1 and sep[1] == '':
+            item = client.describe_table(TableName=table_name)
+            item['Table']['TableName'] = item['Table']['TableName'].split('-' + public_id)[0]
+            list_tables.append(item)
     return list_tables
 
 def get_all_tables():

@@ -36,7 +36,7 @@ Trang chủ
 
 <div class="card">
     <div class="card-header">
-        <h4><b>Tables</b> ({{ tables|length }}) </h4>
+        <h4 id="table-length"><b>Tables</b> ({{ tables|length }}) </h4>
         <!-- <span>use class <code>table-hover</code> inside table element</span> -->
         <!-- <div class="card-header-right">    <ul class="list-unstyled card-option">        <li><i class="icofont icofont-simple-left "></i></li>        <li><i class="icofont icofont-maximize full-card"></i></li>        <li><i class="icofont icofont-minus minimize-card"></i></li>        <li><i class="icofont icofont-refresh reload-card"></i></li>        <li><i class="icofont icofont-error close-card"></i></li>    </ul></div> -->
         <div class="card-header-right">
@@ -61,33 +61,8 @@ Trang chủ
                     </tr>
                 </thead>
                 <tbody id="table-body">
+                    <td><div id="loading-bar-spinner" class="spinner" style="margin-top: 50px;"><div class="spinner-icon"></div></div></td>
 
-                    {% for table in tables%}
-                    <tr id="row-{{loop.index}}" data-index="{{loop.index}}">                        
-                        <th scope="row">
-                            <input type="checkbox" name="{{ table['Table']['TableName'] }}" autocomplete="off" class="action-checkbox" value="{{ table['Table']['TableName'] }}" title="Chọn hồ sơ">
-                        </th>
-                        <td>{{ table['Table']['TableName'] }}</td>
-                        {% with status=table['Table']['TableStatus']%}
-                        {% if status == 'ACTIVE'%}
-                        <td class="text-lowercase text-success font-weight-bold"><i class="ti-arrow-circle-down"></i>    {{ status }}</td>        
-                        {% else %}
-                        <td class="text-lowercase text-danger font-weight-bold">...{{ status}}</td>
-                        {% endif %}
-                        {% endwith %}
-                        {% if table['Table']['AttributeDefinitions']|length > 2%}
-                            <!-- {{ table['Table']['AttributeDefinitions'].pop(0)}} -->
-                        {% endif %}
-                        {% for attribute in table['Table']['AttributeDefinitions'] %}
-                        
-                        <td>{{ attribute['AttributeName'] }} {% with type=attribute['AttributeType'] %} {% if type=='S' %} (String) {% elif type=='N' %} (Number) {% else %} (Binary) {% endif %} {% endwith %}</td>
-
-                        {% endfor %}
-
-                    </tr>        
-                    {% endfor%}
-                    
-                    
                 </tbody>
 
             </table>
@@ -109,73 +84,36 @@ Trang chủ
 {% endblock %}
 {% block script%}
 <script>
-
+    $(document).ready(function(){
+        reloadHandler();
+    });
     var selectall = document.getElementById('selectall');
     var enableDelete = document.getElementById('delete-btn');
     var checkboxs = document.getElementsByClassName('action-checkbox');
     var tableBody = document.getElementById('table-body');
+    var tableLength = document.getElementById('table-length');
     var reloadHTML = `
     <td><div id="loading-bar-spinner" class="spinner" style="margin-top: 50px;"><div class="spinner-icon"></div></div></td>`;
-    function addEventListener_Checkboxs()
-    {
-        for(let i = 0; i < checkboxs.length ; i++) { //zero-based array
-            checkboxs[i].addEventListener('change', function(){
-                if(selectall.checked){
-                    selectall.checked = !selectall.checked;
-                }
-                let count = 0;
-                for(let i = 0; i < checkboxs.length; i++){
-                    if(checkboxs[i].checked)
-                        count++;
-                }
-                if(count == 0){
-                    disabled();
-                }
-                else{
-                    enabled();
-                }
-            });
+    
+    function addEventListener_Checkbox(element){
+        checkboxs = document.getElementsByClassName('action-checkbox');
+        if(selectall.checked){
+            selectall.checked = !selectall.checked;
+        }
+        let count = 0;
+        for(let i = 0; i < checkboxs.length; i++){
+            if(checkboxs[i].checked)
+                count++;
+        }
+        if(count == 0){
+            disabled();
+        }
+        else{
+            enabled();
         }
     }
+    
 
-    addEventListener_Checkboxs();
-
-    function loadDataToRow(data){
-        let text = ``;
-        for(var k in data)
-        {
-            console.log(data[k].Table.TableName);
-            // document.getElementById('table-body').innerHTML 
-            text = text + `
-                <tr>                        
-                    <th scope="row">
-                        <input type="checkbox" name="${data[k].Table.TableName}" autocomplete="off" class="action-checkbox" value="${data[k].Table.TableName}" title="Chọn hồ sơ">
-                    </th>
-                    <td>${data[k].Table.TableName}</td>`;
-            if(data[k].Table.TableStatus == 'ACTIVE'){
-                text = text + `<td class="text-lowercase text-success font-weight-bold"><i class="ti-arrow-circle-down"></i>    ${data[k].Table.TableStatus}</td>`;
-            }
-            else{
-                text = text + `<td class="text-lowercase text-danger font-weight-bold">...${data[k].Table.TableStatus}</td>`;
-            }
-            for(let i in data[k].Table.AttributeDefinitions)
-            {
-                let type = data[k].Table.AttributeDefinitions[i];  
-                text = text + `<td>${type.AttributeName}`;
-                if(type.AttributeType == 'S'){
-                    text = text + ` (String)</td>`;
-                }
-                else if(type.AttributeType == 'N'){
-                    text = text + ` (Number)</td>`;                        
-                }
-                else{
-                    text = text + ` (Binary)</td>`;   
-                }
-            }
-            text = text + `</tr>`;
-        }
-        return text;
-    }
     function reloadHandler(element){
         document.getElementById('table-body').innerHTML = reloadHTML;
         fetch("{{ url_for('ajax_load_tables')}}",{
@@ -186,11 +124,12 @@ Trang chủ
         })
         .then(response => response.json())
         .then(json => {
-            let data = json.tables;
-            document.getElementById('table-body').innerHTML = loadDataToRow(data);
+            document.getElementById('table-body').innerHTML = json.html;
+            tableLength.innerHTML = `<b>Tables</b> (${json.tables.length}) `;
         });
-        checkboxs = document.getElementsByClassName('action-checkbox');  
-        addEventListener_Checkboxs();      
+        checkboxs = document.getElementsByClassName('action-checkbox');
+        selectall.checked = false;  
+        disabled();     
     }
     
     function deleteHandler(element){
@@ -216,9 +155,9 @@ Trang chủ
             })
             .then(response => response.json())
             .then(json => {
-            let data = json.tables;
-            document.getElementById('table-body').innerHTML = loadDataToRow(data);
-        });
+                document.getElementById('table-body').innerHTML = json.html;
+                tableLength.innerHTML = `<b>Tables</b> (${json.tables.length}) `;
+            });
         }
         
 
@@ -248,6 +187,7 @@ Trang chủ
         else{
             enableDelete.classList.add('disabled');                    
         }
+        checkboxs = document.getElementsByClassName('action-checkbox');
         for(let i = 0; i < checkboxs.length ; i++) { //zero-based array
             checkboxs[i].checked = element.checked;
         }
