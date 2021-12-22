@@ -113,19 +113,15 @@ def logout():
 @app.route("/tables")
 @login_required
 def home_page(current_user):
-    list_tables = get_tables(current_user)
     user_name = current_user['user_name']
-    return render_template('index.html',tables=list_tables, current_user=current_user)
+    return render_template('index.html', current_user=current_user)
 
 @app.route("/tables/ajax-get", methods=['GET'])
 @login_required
 def ajax_load_tables(current_user):
-
-    return Response(
-        json.dumps({'tables': get_tables(current_user)}),
-        status=200,
-        mimetype='application/json'
-    )
+    list_tables = get_tables(current_user)
+    return dict(html=render_template('components/load-table.html', tables=list_tables), tables=list_tables)
+    
 
 
 
@@ -157,11 +153,8 @@ def delete_tables(current_user):
         )
         
     list_tables = get_tables(current_user)
-    return Response(
-        json.dumps({'tables': list_tables}),
-        status=200,
-        mimetype='application/json'
-    )
+    return dict(html=render_template('components/load-table.html', tables=list_tables), tables=list_tables)
+
 
 
 
@@ -172,7 +165,7 @@ def ajax_base_html_table(current_user):
     public_id = current_user['public_id']
     if table_name:
         get_items = get_items_table(table_name,public_id)
-        return dict(html=render_template('load-data-table.html', table_name=get_items['table_name']))
+        return dict(html=render_template('components/load-data-table.html', table_name=get_items['table_name']))
     else:
         return Response(
             json.dumps({'error': 'invalid'}),
@@ -186,7 +179,7 @@ def ajax_load_items_table(current_user):
     public_id = current_user['public_id']
     if table_name:
         get_items = get_items_table(table_name, public_id)
-        return dict(html=render_template('reload-items-table.html', table=get_items['table'], columns=get_items['columns'], table_name=get_items['table_name']), table=get_items['table'], columns=get_items['columns'])
+        return dict(html=render_template('components/reload-items-table.html', table=get_items['table'], columns=get_items['columns'], table_name=get_items['table_name']), table=get_items['table'], columns=get_items['columns'])
     else:
         return Response(
             json.dumps({'error': 'invalid'}),
@@ -340,7 +333,7 @@ def create_tables_page(current_user):
             columns = []
 
             columns.append(partition_key)
-            if sort_key != None:
+            if sort_key != '':
                 columns.append(sort_key)
 
             log_table = resource.Table('log_table')
