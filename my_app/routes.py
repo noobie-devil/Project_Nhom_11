@@ -12,6 +12,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from datetime import datetime, timedelta
 from functools import wraps
+from my_app.function import *
 
 
 
@@ -19,7 +20,7 @@ from functools import wraps
 def test():
     return render_template('test.html')
 
-def token_required(f):
+def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
@@ -39,6 +40,11 @@ def token_required(f):
                     'public_id': data['public_id']
                 }
             )
+            if request.path.split('/')[1] == 'admin':
+                pass
+            else:
+                if current_user['Item']['is_admin']:
+                    return redirect(url_for('admin.index'))
         except:
             flash(f'Login session has expired!!! please login again.', category='danger')
             return redirect(url_for('login_page'))
@@ -84,7 +90,10 @@ def login_page():
             session.permanent = True
             
             flash(f'Success! You are logged in as: {user["user_name"]}', category='success')
-            return redirect(url_for('home_page'))
+            if user['is_admin']:
+                return redirect(url_for('admin.index'))
+            else:
+                return redirect(url_for('home_page'))
         else:
             flash('Username and password are not match! Please try again', category='danger')
     
@@ -98,29 +107,18 @@ def logout():
         flash("You have been logged out! ", category='info')
     return redirect(url_for("home_page"))
 
-def create_user(user_name, public_id, email_address, password):
-    table = resource.Table('user_table')
-    response = table.put_item(
-        Item={
-            'user_name': user_name,
-            'public_id': public_id,
-            'email_address': email_address,
-            'password': password,
-            'is_admin': False
-        }
-    )
-    return response
+
 
 @app.route("/")
 @app.route("/tables")
-@token_required
+@login_required
 def home_page(current_user):
     list_tables = get_tables(current_user)
     user_name = current_user['user_name']
     return render_template('index.html',tables=list_tables, current_user=current_user)
 
 @app.route("/tables/ajax-get", methods=['GET'])
-@token_required
+@login_required
 def ajax_load_tables(current_user):
 
     return Response(
@@ -129,19 +127,10 @@ def ajax_load_tables(current_user):
         mimetype='application/json'
     )
 
-def get_tables(current_user):
-    public_id = current_user['public_id']
-    get_tables = get_all_table_by_public_id(public_id)
-    list_tables = []
-    for table in get_tables:
-        item = client.describe_table(TableName=str(table['table_name'] + '-' + public_id))
-        item['Table']['TableName'] = item['Table']['TableName'].split('-' + public_id)[0]
-        list_tables.append(item)
 
-    return list_tables
 
 @app.route("/tables/ajax-delete", methods=['POST'])
-@token_required
+@login_required
 def delete_tables(current_user):
     data = request.json
     public_id = current_user['public_id']
@@ -177,32 +166,44 @@ def delete_tables(current_user):
 
 
 @app.route('/items', methods=['POST'])
-@token_required
-def ajax_get_table(current_user):
+@login_required
+def ajax_base_html_table(current_user):
     table_name = request.json['table_name']
     public_id = current_user['public_id']
     if table_name:
-        table_name_origin = str(table_name + '-' + public_id)
-        table = resource.Table(table_name_origin)
-        response = table.scan()
-        data = response['Items']
-        columns = get_all_columns(table_name, public_id)
-        return dict(html=render_template('load-data-table.html', table=data, columns=columns, table_name=table_name_origin))
+        get_items = get_items_table(table_name,public_id)
+        return dict(html=render_template('load-data-table.html', table_name=get_items['table_name']))
     else:
         return Response(
             json.dumps({'error': 'invalid'}),
             status=400,
             mimetype='application/json'
         )
-    
+@app.route('/items/get-data', methods=['POST'])
+@login_required
+def ajax_load_items_table(current_user):
+    table_name = request.json['table_name']
+    public_id = current_user['public_id']
+    if table_name:
+        get_items = get_items_table(table_name, public_id)
+        return dict(html=render_template('reload-items-table.html', table=get_items['table'], columns=get_items['columns'], table_name=get_items['table_name']), table=get_items['table'], columns=get_items['columns'])
+    else:
+        return Response(
+            json.dumps({'error': 'invalid'}),
+            status=400,
+            mimetype='application/json'
+        )
+
+
+
 @app.route('/items')
-@token_required
+@login_required
 def items_page(current_user):
     list_tables = get_all_table_by_public_id(current_user['public_id'])
     return render_template('items.html', list_tables=list_tables, current_user=current_user)
 
 @app.route("/edit-item")
-@token_required
+@login_required
 def edit_item_page(current_user):
     table_name_origin = request.args.get('table-name')
     public_id = current_user['public_id']
@@ -220,10 +221,64 @@ def edit_item_page(current_user):
                 list_key.append(key)
                 break
 
-    return render_template('edit-item.html',table_name=table_name, data=data, list_key=list_key, all_columns=all_columns)  
+    return render_template('edit-item.html',table_name=table_name, data=data, list_key=list_key, all_columns=all_columns, current_user=current_user)  
+
+@app.route("/edit-item/ajax-delete-item", methods=['POST'])
+@login_required
+def ajax_delete_item(current_user):
+    data = request.json
+    indexes = data['items']
+    table = resource.Table(data['table_name'])
+    response = table.scan()
+    items = response['Items']
+
+    rows = []
+    for i in indexes:
+        rows.append(items[int(i)])
+
+    all_columns = data['columns']
+    # Get all columns exists in list rows deleted
+    cols = []
+    for row in rows:
+        for key, value in row.items():
+            if key in cols:
+                continue
+            else:
+                cols.append(key)
+    records_to_delete = []
+    for row in rows:
+        record = {}
+        for i in range(0,2):
+            record[all_columns[i]] = row[all_columns[i]]
+        records_to_delete.append(record)
+    
+    table = resource.Table(data['table_name'])
+    for record in records_to_delete:
+        try:
+            response = table.delete_item(Key=record)
+
+        except botocore.exceptions.ClientError as err:
+
+            return Response(
+                json.dumps({'Error Message': err.response['Error']['Message']}),
+                status=err.response['ResponseMetadata']['HTTPStatusCode'],
+                mimetype='application/json'
+            )
+    # if delete rows successfully, delete columns not have data in table
+    if response['ResponseMetadata']['HTTPStatusCode'] == 200:
+        delete_cols = not_exist_col(data['table_name'], cols)
+        if len(delete_cols) != 0:
+            response = delete_cols_not_exist_data(data['table_name'],current_user['public_id'], delete_cols, all_columns)
+
+        return Response(
+            json.dumps({'msg': "Deleted a record successfully", 'category_msg': 'success'}),
+            status=200,
+            mimetype='application/json'
+        )
+
 
 @app.route("/edit-item/ajax-edit-item", methods=['POST'])
-@token_required
+@login_required
 def ajax_edit_item(current_user):
     data = request.json
     public_id = current_user['public_id']
@@ -245,132 +300,9 @@ def ajax_edit_item(current_user):
                 if len(new_cols) > 0:
                     append = append_new_col_to_table(new_cols, data['table_name'], public_id)
                 # if append return true, success add new col to log table
-                if append:
-                    return Response(
-                        json.dumps({'response': response}),
-                        status=200,
-                        mimetype='application/json'
-                    )
-            except botocore.exceptions.ClientError as err:
-
+                
                 return Response(
-                    json.dumps({'Error Message': err.response['Error']['Message']}),
-                    status=err.response['ResponseMetadata']['HTTPStatusCode'],
-                    mimetype='application/json'
-                )
-        else:
-            return Response(
-                json.dumps({"Error Message": "bad request."}),
-                status=400,
-                mimetype='application/json'
-            ) 
-    else:
-        return Response(
-            json.dumps({"Error Message": "table not existings."}),
-            status=400,
-            mimetype='application/json'
-        )
-
-
-
-@app.route("/tables/<table_name>/", methods=['DELETE'])
-def api_delte(table_name):
-    existing_tables = client.list_tables()['TableNames']
-    if table_name in existing_tables:
-        table = resource.Table(table_name)
-        if request.method == 'DELETE':
-            params = request.json
-            try:
-                response = table.delete_item(Key=params)
-                return Response(
-                    json.dumps({'response': response}),
-                    status=200,
-                    mimetype='application/json'
-                )
-            except botocore.exceptions.ClientError as err:
-
-                return Response(
-                    json.dumps({'Error Message': err.response['Error']['Message']}),
-                    status=err.response['ResponseMetadata']['HTTPStatusCode'],
-                    mimetype='application/json'
-                )
-        else:
-            return Response(
-                json.dumps({"Error Message": "bad request."}),
-                status=400,
-                mimetype='application/json'
-            ) 
-    else:
-        return Response(
-            json.dumps({"Error Message": "table not existings."}),
-            status=400,
-            mimetype='application/json'
-        )    
-
-def append_new_col_to_table(new_cols, table_name, public_id):
-    table = resource.Table('log_table')
-    result = table.update_item(
-        TableName='log_table',
-        Key={
-            'public_id': public_id,
-            'table_name': table_name
-        },
-        UpdateExpression='SET #attr= list_append(if_not_exists(#attr, :empty_list), :my_value)',
-        ExpressionAttributeValues={
-            ":my_value": new_cols,
-            ":empty_list": []
-        },
-        ExpressionAttributeNames={
-            "#attr": 'columns',
-        },
-        ReturnValues='UPDATED_NEW'
-    )
-    if result['ResponseMetadata']['HTTPStatusCode'] == 200 and 'Attributes' in result:
-        return True
-    else:
-        return False
-
-# @app.route("/tables/category_table/append", methods=['POST'])
-# def append_list():
-#     data = request.json
-#     table = resource.Table('category_table')
-#     result = table.update_item(
-#         TableName='category_table',
-#         Key={
-#             'category_id': 1231,
-#             'category_name': 'user_1'
-#         },
-#         UpdateExpression='SET #attr= list_append(if_not_exists(#attr, :empty_list),:my_value)', #'SET #col = list_append(if_not_exists(#col, :empty_list), :my_value)',
-#         ExpressionAttributeValues={
-            
-#             ":my_value": ["alo_men"], 
-#             ":empty_list": []
-            
-#         },
-#         ExpressionAttributeNames={
-#         "#attr": "Columns",
-
-#         },
-#         ReturnValues="UPDATED_NEW"
-#     )
-#     if result['ResponseMetadata']['HTTPStatusCode'] == 200 and 'Attributes' in result:
-#         return Response(
-#             json.dumps({'data': result['Attributes']['Columns']}),
-#             status=200,
-#             mimetype='application/json'
-#         ) 
-
-@app.route("/tables/<table_name>/", methods=['PUT', 'POST'])
-def api_update(table_name):
-    existing_tables = client.list_tables()['TableNames']
-    if table_name in existing_tables:
-        table = resource.Table(table_name)
-        if request.method == 'POST' or request.method == 'PUT':
-            params = request.json
-            try:
-                response = table.put_item(Item=params)
-                return Response(
-                    json.dumps({'response': response}),
+                    json.dumps({'response': 'response'}),
                     status=200,
                     mimetype='application/json'
                 )
@@ -393,27 +325,9 @@ def api_update(table_name):
             status=400,
             mimetype='application/json'
         )
-        
-
-
-def get_all_table_by_public_id(public_id=None):
-	query = query_table(table_name='log_table',key='public_id',value=public_id)
-	return query.get('Items')
-   
-
-
-def get_all_columns(table_name, public_id):
-    table = resource.Table('log_table')
-    response = table.get_item(
-        Key = {
-            'public_id': public_id,
-            'table_name': table_name
-        }
-    )
-    return response['Item']['columns']
 
 @app.route("/create-tables", methods=["POST", "GET"])
-@token_required
+@login_required
 def create_tables_page(current_user):
     form = CreateTableForm()
     
@@ -467,3 +381,6 @@ def create_tables_page(current_user):
             flash(f'A table with the same name already exists. Table names in the same account and same AWS Regions must be unique.', category='danger')
         
     return render_template('create-tables.html', form=form, current_user=current_user)    
+
+
+from my_app import admin
