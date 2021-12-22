@@ -287,22 +287,21 @@ Edit Item | Management DynamoDB
         sortKey = document.getElementById('sort-key').getAttribute('data-sort-key');
         sortValue = document.getElementById('sort-value');
         json = {};
-        if(partitionValue.getAttribute('data-type') == 'S'){
-            jsonText = `{"${partitionKey}": "${partitionValue.value}",`
-            json[`${partitionKey}`] = `${partitionValue.value}`;
+        if(partitionValue.getAttribute('data-type') == 'N'){
+            // json[`${partitionKey}`] = `${partitionValue.value}`;
+            json[`${partitionKey}`] = parseFloat(partitionValue.value);
+
         }
         else{
-            jsonText = `{"${partitionKey}": ${partitionValue.value},`
             json[`${partitionKey}`] = partitionValue.value;
 
         }
-        if(sortValue.getAttribute('data-type') == 'S'){
-            jsonText = jsonText + `"${sortKey}": "${sortValue.value}",`;
-            json[`${sortKey}`] = `${sortValue.value}`;
+        if(sortValue.getAttribute('data-type') == 'N'){
+            // json[`${sortKey}`] = `${sortValue.value}`;
+            json[`${sortKey}`] = parseFloat(sortValue.value);
 
         }
         else{
-            jsonText = jsonText + `"${sortKey}": ${sortValue.value},`;
             json[`${sortKey}`] = sortValue.value;
 
         }
@@ -317,7 +316,6 @@ Edit Item | Management DynamoDB
                 let field = row.querySelector('.col-8 button');
                 let keyType = field.getAttribute('data-key-type');
                 let value = [];
-                jsonText = jsonText + `"${attributeName}": [`;
                 json[`${attributeName}`] = [];
                 i += 1;
                 while(myTable.rows[i] != undefined){
@@ -325,12 +323,10 @@ Edit Item | Management DynamoDB
                     
                     if(childRow.classList.contains(`child-element-${field.getAttribute('data-marked')}`)){
                         console.log('running');
-                        if(keyType == 'SS'){
-                            jsonText = jsonText + `"${childRow.querySelector('.col-8 input').value}",`;
-                            json[`${attributeName}`].push(`${childRow.querySelector('.col-8 input').value}`);
+                        if(keyType == 'NN'){
+                            json[`${attributeName}`].push(parseFloat(childRow.querySelector('.col-8 input').value));
                         }
                         else{
-                            jsonText = jsonText + `${childRow.querySelector('.col-8 input').value},`;
                             json[`${attributeName}`].push(childRow.querySelector('.col-8 input').value);
 
                         }
@@ -341,7 +337,6 @@ Edit Item | Management DynamoDB
                         break;
                     }
                 }
-                jsonText = jsonText + `],`;
 
             }
             else
@@ -350,11 +345,9 @@ Edit Item | Management DynamoDB
                 let keyType = row.querySelector('.col-1 h6').getAttribute('data-key-type');
                 if(keyType == "BOOL")
                 {
-                    jsonText = jsonText + `"${attributeName}": `;
                     let field = row.querySelectorAll('.col-8 .form-check input');
                     field.forEach(el => {
                         if(el.checked){
-                            jsonText = jsonText + `${el.value},`;
                             json[`${attributeName}`] = el.value;
                         }
                     });
@@ -362,24 +355,18 @@ Edit Item | Management DynamoDB
                 else{
                     let field = row.querySelector('.col-8 input');
                     // let keyType = field.getAttribute('data-key-type');
-                    jsonText = jsonText + `"${attributeName}": `;
-                    if(keyType == "S"){
-                        jsonText = jsonText + `"${field.value}",`;
-                        json[`${attributeName}`] = `${field.value}`;
+                    if(keyType == "n"){
+                        json[`${attributeName}`] = parseFloat(field.value);
                     }
                     else{
-                        jsonText = jsonText + `${field.value},`;
                         json[`${attributeName}`] = field.value;
                     }
                 }
                 
             }
             
-            console.log(jsonText);
             
         }
-        jsonText = jsonText + '}';
-        console.log(jsonText);
         console.log(json);
         return json;
     }

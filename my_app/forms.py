@@ -4,7 +4,7 @@ from wtforms.validators import Length, EqualTo, DataRequired, ValidationError, E
 from boto3.dynamodb.conditions import Key
 from my_app import client, resource
 import re
-
+from my_app.function import *
 
 class CreateTableForm(FlaskForm):
 
@@ -47,15 +47,7 @@ class RegisterForm(FlaskForm):
 	submit = fields.SubmitField(label='Sign up now.')
 
 class LoginForm(FlaskForm):
-	email_address = fields.StringField(label='Email Address', validators=[Email(), DataRequired()])
+	email_address = fields.StringField(label='Email Address', validators=[DataRequired()])
 	password = fields.PasswordField(label='Password:', validators=[Length(min=8, max=60), DataRequired()])
 	submit = fields.SubmitField(label='Sign in')
 
-
-def query_table(table_name, key=None, value=None):
-	table = resource.Table(table_name)
-	if key is not None and value is not None:
-		filtering_exp = Key(key).eq(value)
-		return table.query(KeyConditionExpression=filtering_exp)
-
-	raise ValueError('Parameter missing or invalid')

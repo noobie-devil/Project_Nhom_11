@@ -96,6 +96,27 @@ test
 
                                     </td>
                                 </tr>
+                                <tr class="d-flex">
+                                    <td class="col-2">
+                                        <h6 class="text-center" id="sort-key" data-sort-key="" style="text-transform: none; font-weight: normal;font-weight: bold;"><p style="font-style: italic; font-weight: normal; color: #687078;">-Sort key</p>
+                                        </h6>
+                                    </td>
+
+                                    <td class="col-8">
+
+                                        <input type="number" data-type="" class="form-control input-sm" id="sort-value"
+                                        name="sort-value" value="0">
+                                    </td>
+                                    <td class="col-1">
+                                        <h6 class="text-center" style="text-transform: none; font-weight: normal;font-weight: bold;">Type
+                                        </h6>
+                                    </td>
+
+
+                                    <td class="col-1">
+
+                                    </td>
+                                </tr>
                                 <!-- <tr class='d-flex'>
                                     <td class="col-2">
                                         <input name="nameColumnTable" type="text" class="form-control input-sm" placeholder="name column">
@@ -247,6 +268,10 @@ test
     var dataMarked = 1;
     var myTable = document.getElementById('myTable');
     var tableBody = document.querySelector('#myTable tbody');
+    var inputNumber = document.querySelector('input[type="number"]');
+    inputNumber.addEventListener('mouseup', function(el){
+        alert(el.currentTarget.value);
+    });    
     
     var type = {
         "S": "String",
