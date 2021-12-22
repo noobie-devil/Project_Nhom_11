@@ -2,6 +2,35 @@
 {% block title %}
 Trang chủ
 {% endblock %}
+{% block header%}
+<div class="page-header card">
+    <div class="row align-items-end">
+        <div class="col-lg-8">
+            <div class="page-header-title">
+                <i class="icofont icofont-database bg-c-blue"></i>
+                <div class="d-inline">
+                    <h4>Tables</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="page-header-breadcrumb">
+                <ul class="breadcrumb-title">
+                    <li class="breadcrumb-item">
+                        <a href="/">
+                            <i class="icofont icofont-home"></i>
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('home_page') }}">DynamoDB</a>
+                    </li>
+                    <li class="breadcrumb-item"><a href="#!">Tables</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock%}
 {% block content %}
 <!-- Hover table card start -->
 
@@ -46,8 +75,13 @@ Trang chủ
                         <td class="text-lowercase text-danger font-weight-bold">...{{ status}}</td>
                         {% endif %}
                         {% endwith %}
+                        {% if table['Table']['AttributeDefinitions']|length > 2%}
+                            <!-- {{ table['Table']['AttributeDefinitions'].pop(0)}} -->
+                        {% endif %}
                         {% for attribute in table['Table']['AttributeDefinitions'] %}
+                        
                         <td>{{ attribute['AttributeName'] }} {% with type=attribute['AttributeType'] %} {% if type=='S' %} (String) {% elif type=='N' %} (Number) {% else %} (Binary) {% endif %} {% endwith %}</td>
+
                         {% endfor %}
 
                     </tr>        

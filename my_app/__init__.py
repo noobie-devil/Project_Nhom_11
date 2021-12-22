@@ -8,9 +8,9 @@ app.config['SECRET_KEY'] = '1fabace46bcf5b6eebda3de7'
 app.config['PERMANENT_SESSION_LIFETIME'] =  timedelta(minutes=30)
 
 app.config['AWS_CONFIGURE'] = {
-    "aws_access_key_id": "ASIAUCYL4TUR4AITQHWK",
-    "aws_secret_access_key": "7oA95AimT0EVxqtDZSKsVEwZPUoA4qGVAK8oH9Ja",
-    "aws_session_token": "FwoGZXIvYXdzEIb//////////wEaDA8jOiQm3HI7Rr+H5SLPAStUu2ecYk1heHNGxCvr8mv36b2/IJ3rUs9vIJxrOXXnAbFElBRe2XhCwsirJzvlidIyZPk/MEM2dialVqXcmgqeZEpWFommHDVrvfhIZZ9V8GxZe5jpyHHztqzeqOLRwwx+hCWvgMDlz6fKxiePFGJTCqG2ErSGdKPIQnAtFdX3/w9z+2VcXC2aBhsa74CVyU3a3/7xavyRgIAI7tN7B06f/uLvebhtV2jwXdMnAdlfq2tzM6yYv3QntW0J5ctwWZ/b8px5YpAVN1eJnt4T5iien+KNBjItPZxmzCgFAjjlgIEotGiM9TgSRNFHc/ZTKzvVA2eZqCUciHwLItNrK3cEVdU/",
+    "aws_access_key_id": "ASIAUCYL4TURYEZFV7SV",
+    "aws_secret_access_key": "0CdkuwyRKo8gh3RuJBJuPQDZTmCyCHoDgwbiKcX0",
+    "aws_session_token": "FwoGZXIvYXdzED4aDEcQbvSAMBgaOUtsByLPAZfrKrT1NfyZXi4vQP8bBNGw2IduRXdQeGZ9EIoMlAMCyh8v6t97XbWqjDJLsRRH8Ouqb0jfWSO67XS+CsUGMGOO/bDlhubqFPnF3udNTp454PWfn7hTHTVuYpdUlbRp0vw/nId1t+9zqmEEzhYU7V+G/JtZ2JII5FES+ziMjlF7/zPQ/j8nTqmH9ZAgD7vFJUjELRIK1vl3fedVimFnjabp86BkiXVEuDgIjQOi9yIcQTSrhe1qtUn77h6lM/NlcPfvAXYol/sufDux0chyPij94YqOBjItyRH7Mw6D5WEjw8ItTdfjeS8OTt+zullo8ktu1NJnhXJCOgxUQX3CUODR04hm",
     'region_name': 'us-east-1'
 }
 
@@ -26,4 +26,9 @@ resource = boto3.resource('dynamodb',aws_access_key_id=app.config["AWS_CONFIGURE
     region_name=app.config["AWS_CONFIGURE"]["region_name"]
 )
 
+
 from my_app import routes
+from my_app import api
+from my_app import admin
+
+
