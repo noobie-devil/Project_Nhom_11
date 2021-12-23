@@ -108,7 +108,7 @@ def api_edit_items(current_user, table_name):
 			if len(new_cols) > 0:
 				append = append_new_col_to_table(new_cols, table_name, current_user['public_id'])
 			return Response(
-				json.dumps({"response": response}),
+				json.dumps({"message": 'Edited successfully'}),
 				status=200,
 				mimetype='applicationl/json'
 			)
