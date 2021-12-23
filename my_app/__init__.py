@@ -8,9 +8,9 @@ app.config['SECRET_KEY'] = '1fabace46bcf5b6eebda3de7'
 app.config['PERMANENT_SESSION_LIFETIME'] =  timedelta(minutes=30)
 
 app.config['AWS_CONFIGURE'] = {
-    "aws_access_key_id": "ASIAUCYL4TURQWJM3KEE",
-    "aws_secret_access_key": "5Aqy3hJepd/Vx1WBpUdIBl3om+qYGfZ5SEdCBPqr",
-    "aws_session_token": "FwoGZXIvYXdzEEQaDBVxQVRouwv5vfEn3yLPAW3ty2zR5qVEAqNBd5tVZX5GD6312Ij0dxDSMrOwEmHhoCOfSotQxCWrfbyCoGjcv6qckXTfoePIpM9hqYX5k4hrd9bo8kNlj+covGVW2Ob0dPgfYW4r9aACqhxTMe3TfOrm3o7/ocRnDLGLVkwRBKGlBMkJ5gDPPlFuXvzJNFzK7S6JzPEmdzJvurWHm3DZzTU8ImnZEiG79x9TvR4VGKZIh9WGYN2pme0XNa9XkIeG9XBlT8yhTmW/JTN3060CXmMnUo/76HuvO7wfcnNGtii/h4yOBjItTi/5WdfpGLkH4YvmPMMbR2jCB/3yxsjXf4/3u2yjT3Gutm29Xv0VaNnpgDko",
+    "aws_access_key_id": "ASIAUCYL4TUR5SFZRDLB",
+    "aws_secret_access_key": "AUvw+EnIbv/A+o0URwn3a9SmPX0LsA3M7IjrmeZf",
+    "aws_session_token": "FwoGZXIvYXdzEF8aDGzN9QRdedckOX9FwiLPAS4Xqd06/PBzPJ07VoukThLCaf3FhAf5cs9JMvypInrxhCuAuxsHmi5EXFNBrTHxm+kdVazjxwxZwyzbikQuawP7THHlhBJNZpAV0W23Q5Evf5rqpFdrN7U9oad++TX/83PR67SAHuiaGoyO0PXfZqJ/+3a1gbSUTvSUWvjlCvSO/yTBxcmsunkXVQQ1SzAi/H9NxbDtiF+RKkkOLRHGfGCkg2dxvlYHNYl5P+nU+JlYYY/wDEV2vRaEgwc4gm2sdMfwLj+Zm0OPHA92MSewqSiJ+pGOBjItTe1sHhI6fXOUMZafRFeUl5s/eXq7ZYahp5+SXMY4wffnVvWcOvBEeWz8xr0n",
     'region_name': 'us-east-1'
 }
 
