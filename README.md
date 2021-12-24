@@ -29,6 +29,21 @@
 
 ## Yêu cầu 
 
+Truy cập vào thư mục project, chạy các lệnh sau để init các table cần thiết trước khi khởi chạy project
+
+```bash
+  cd Project_Nhom_11
+```
+```bash
+  python
+```
+```bash
+  from my_app import first_init
+```
+```bash
+  first_init.run()
+```
+<!-- 
 Tạo 1 bảng để lưu thông tin người dùng với tên bảng là 'user_table', Partition Key là 'user_name' kiểu String, Sort Key là 'public_id' kiểu String
 
 ![App Screenshot](https://i.imgur.com/E8eQfCc.png)
@@ -39,7 +54,7 @@ Khởi tạo 1 Global secondary indexes trong bảng 'user_table' với Partitio
 
 Tạo 1 bảng để lưu thông tin các bảng được tạo bởi người dùng với tên bảng là 'log_table', Partition Key là 'public_id' kiểu String, Sort Key là 'table_name' kiểu String
 
-![App Screenshot](https://imgur.com/MWQwKCH.png)
+![App Screenshot](https://imgur.com/MWQwKCH.png) -->
 
 Từ AWS Lambda, tạo 1 Lambda Function với đoạn code sau đây
 

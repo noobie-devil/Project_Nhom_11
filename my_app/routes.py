@@ -16,9 +16,6 @@ from my_app.function import *
 
 
 
-@app.route("/test")
-def test():
-    return render_template('test.html')
 
 def login_required(f):
     @wraps(f)
