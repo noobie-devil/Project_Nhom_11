@@ -5,7 +5,7 @@ import requests
 from urllib.parse import quote
 
 def create_log_table():
-	table_name = 'log_table_exam'
+	table_name = 'log_table'
 	existing_tables = client.list_tables()['TableNames']
 	if table_name not in existing_tables:
 		
