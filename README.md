@@ -16,7 +16,7 @@
 
 **Client:** Html, Css3, Bootstrap
 
-**Server:** Flask Framework, AWS Lambda Function, AWS SQS
+**Server:** Flask Framework, AWS Lambda, AWS SQS, AWS EC2
 
 **Database:** DynamoDB
 
@@ -41,7 +41,7 @@ Tạo 1 bảng để lưu thông tin các bảng được tạo bởi người d
 
 ![App Screenshot](https://imgur.com/MWQwKCH.png)
 
-Từ AWS Lambda Function, tạo 1 Lambda Function với đoạn code sau đây
+Từ AWS Lambda, tạo 1 Lambda Function với đoạn code sau đây
 
 ```python3
 import json
@@ -109,7 +109,7 @@ Copy URL của hàng đợi vừa tạo ở trên, truy cập vào file routes.p
 ```
 ![App Screenshot](https://imgur.com/4c5XW4H.png)
 
-Từ AWS Lambda Function, tạo 1 Lambda Function với đoạn code sau đây
+Từ AWS Lambda, tạo 1 Lambda Function với đoạn code sau đây
 
 ```python3
 import json
@@ -151,6 +151,53 @@ Copy URL của hàng đợi vừa tạo ở trên, truy cập vào file routes.p
 
 ![App Screenshot](https://imgur.com/WuWoKqo.png)
 
+## Chạy trên Localhost
+
+Clone project từ github
+
+```bash
+  git clone https://github.com/truongnguyenvan8801/Project_Nhom_11.git
+```
+
+Truy cập thư mục chứa project
+
+```bash
+  cd Project_Nhom_11
+```
+
+Tạo môi trường ảo
+
+```bash
+  virtualenv venv
+```
+Kích hoạt môi trường ảo
+
+```bash
+  .\venv\Scripts\activate
+```
+Cài đặt các thư viện 
+
+```bash
+  pip install -r requirements.txt
+```
+
+Cung cấp các secret key cần thiết để sử dụng các tài nguyên trong AWS
+
+```bash
+  cd my_app/__init__.py
+```
+![App Screenshot](https://imgur.com/MJgWqhy.png)
+
+Chạy chương trình
+```bash
+  $env:FLASK_APP='run'
+```
+```bash
+  $env:FLASK_DEBUG=1
+```
+```bash
+  flask run
+```
 
 ## Deploy lên AWS EC2
 
